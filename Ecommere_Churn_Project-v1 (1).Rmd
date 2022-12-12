@@ -1,0 +1,396 @@
+---
+title: "Ecommerce Customers Churn Analysis"
+author: "Ravina Ingole, Abhishek Kukreja and Akash Dhage "
+date: "`r format(Sys.time(),'%B %d, %Y')`"
+output: 
+      html_document:
+        toc: true
+        toc_float:
+          collapse: false
+          smooth_scroll: true
+---
+
+<style>
+#TOC {
+  color: blue;
+  font-family: Calibri;
+  font-size: 16px; 
+  border-color: #708090;
+}
+#header {
+  color: black;
+  background-color: #F5F5F5;
+  opacity: 0.6;
+  font-family: Calibri;
+  font-size: 20px;
+}
+body {
+  color: #708090;
+  font-family: Calibri;
+  background-color: #F5F5F5;
+}
+pre {
+  color: #708090;
+  background-color: #F8F8FF;
+}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r data, include=FALSE}
+#library(tidyverse)
+library(ggthemes)
+library(wesanderson)
+library(ggplot2)
+library(datasets)
+library(caTools)
+library(dplyr)
+library(magrittr)
+library(party)
+
+# reading contents of csv file
+hd <- read.csv("C:/Users/Abhishek/Desktop/Abhishek/Sem 2/DA/Project/Ecommerce/Ecommerce Dataset.csv")
+```
+
+# Summary of `E-commerce dataset` and cleaning.
+
+```{r Dataset Summary}
+print(head(hd))
+print(str(hd))
+print(summary(hd))
+```
+### Finding number of null values.
+
+```{r Finding number of null values}
+print(colSums(is.na(hd)))
+
+```
+
+### Checking Outliers
+
+```{r Checking outliers using boxplot}
+boxplot(hd$Tenure, hd$WarehouseToHome, hd$DaySinceLastOrder, hd$NumberOfAddress,
+main = "Multiple boxplots for comparision",
+at = c(1,2,4,5),
+names = c("Tenure", "WarehouseToHome", "DaySinceLastOrder", "NumberOfAddress"),
+las = 2,
+col = c("orange","red","Black", "Grey"),
+border = "brown",
+notch = TRUE
+)
+```
+
+
+```{r Checking outliers using boxplot for different variables}
+boxplot(hd$OrderAmountHikeFromlastYear, hd$CouponUsed, hd$OrderCount,
+main = "Multiple boxplots for comparision",
+at = c(1,2,4),
+names = c("OrderAmountHikeFromlastYear", "CouponUsed", "OrderCount"),
+las = 2,
+col = c("orange","red","light Blue"),
+border = "brown",
+notch = TRUE
+)
+```
+```{r Checking outliers using boxplot for CashbackAmount}
+boxplot(hd$CashbackAmount,data=hd, main="Churn Vs Cash Back Amount",
+   xlab="Churn", ylab="Cash Back Amount")
+```
+
+
+```{r Checking outliers using boxplot for OrderAmountHikeFromlastYear}
+boxplot(hd$OrderAmountHikeFromlastYear,data=hd, main="Order Amount Hike From last Year",
+   xlab="Churn", ylab="Order Amount Hike From last Year")
+```
+
+
+### Plotting Histogram
+
+```{r Histogram for Tenure}
+ggplot(hd, aes(x=Tenure))+
+  geom_histogram(color="darkblue", fill="lightblue")
+```
+
+```{r Histogram for Warehouse To Home}
+ggplot(hd, aes(x=WarehouseToHome))+
+  geom_histogram(color="darkblue", fill="lightblue")
+```
+
+```{r Histogram for Hour Spend On App}
+ggplot(hd, aes(x=HourSpendOnApp))+
+  geom_histogram(color="darkblue", fill="lightblue")
+```
+
+```{r Histogram for Coupon Used}
+ggplot(hd, aes(x=CouponUsed))+
+  geom_histogram(color="darkblue", fill="lightblue")
+```
+
+
+```{r Histogram for Order Count}
+ggplot(hd, aes(x=OrderCount))+
+  geom_histogram(color="darkblue", fill="lightblue")
+```
+
+```{r Histogram for Day Since Last Order}
+ggplot(hd, aes(x=DaySinceLastOrder))+
+  geom_histogram(color="darkblue", fill="lightblue")
+```
+```{r Histogram for Order Amount Hike From last Year}
+hist <-ggplot(hd, aes(x=OrderAmountHikeFromlastYear))
+  hist + geom_histogram(color="darkblue", fill="lightblue")
+```
+
+
+### Plotting Box Plot
+
+```{r Box plot of churn}
+counts <- table(hd$Churn)
+barplot(counts, main="Churn Distribution",
+   xlab="Churn")
+```
+```{r Box plot of SatisfactionScore}
+tbl <- with(hd, table(Churn, SatisfactionScore))
+barplot(tbl, beside = TRUE, legend = TRUE,main="Satisfaction Score",
+   xlab="Satisfaction")
+```
+```{r Box plot of Tenure and Churn}
+tbl <- with(hd, table(Churn, Tenure))
+barplot(tbl, beside = TRUE, legend = TRUE,main="Impact of Tenure on Churn",
+   xlab="Tenure")
+```
+
+```{r Box plot of HourSpendOnApp and Churn}
+tbl <- with(hd, table(Churn, HourSpendOnApp))
+barplot(tbl, beside = TRUE, legend = TRUE,main="Hours Spent on App/Website Distribution",
+   xlab="HourSpendOnApp")
+```
+
+```{r Box plot of Complain and Churn}
+tbl <- with(hd, table(Churn, Complain))
+barplot(tbl, beside = TRUE, legend = TRUE,main="Impact of No. of Complains on Churn",
+   xlab="Complain")
+```
+
+```{r Box plot of PreferredPaymentMode and Churn}
+tbl <- with(hd, table(Churn, PreferredPaymentMode))
+barplot(tbl, beside = TRUE, legend = TRUE,main="Payment Mode vs Churn",
+   xlab="PreferredPaymentMode")
+```
+
+```{r Box plot of Gender and Churn}
+tbl <- with(hd, table(Churn, Gender))
+barplot(tbl, beside = TRUE, legend = TRUE,main="Gender-wise Churn Distribution",
+   xlab="Gender")
+```
+
+```{r Box plot of CityTier and Churn}
+tbl <- with(hd, table(Churn, CityTier))
+barplot(tbl, beside = TRUE, legend = TRUE,main="City Tier Churn Distribution",
+   xlab="CityTier")
+```
+
+### Plotting scatter plot
+
+```{r Scatter plot of Tenure and CashbackAmount}
+plot(hd$Tenure, hd$CashbackAmount, col='grey',main="Tenure vs Cashback Amount", pch=10)
+
+```
+
+```{r Scatter plot of Order Count vs Coupon Used}
+plot(hd$OrderCount, hd$CouponUsed, col='grey',main="Order Count vs Coupon Used", pch=10)
+
+```
+
+```{r Scatter plot of Coupon Used vs Day Since Last Order}
+plot(hd$DaySinceLastOrder, hd$CouponUsed, col='grey',main="Coupon Used vs Day Since Last Order", pch=10)
+
+```
+
+```{r Scatter plot of Order Count vs Day since Last Order}
+plot(hd$DaySinceLastOrder, hd$OrderCount, col='grey',main="Order Count vs Day since Last Order", pch=10)
+
+```
+
+# Handling Null Values
+
+```{r Handling null values with median}
+medTenure <- median(hd$Tenure,na.rm = TRUE)
+medWarehouseToHome <- median(hd$WarehouseToHome,na.rm = TRUE)
+medHourSpendOnApp <- median(hd$HourSpendOnApp,na.rm = TRUE)
+medCouponUsed <- median(hd$CouponUsed,na.rm = TRUE)
+medOrderAmountHikeFromlastYear <- median(hd$OrderAmountHikeFromlastYear,na.rm = TRUE)
+medDaySinceLastOrder <- median(hd$DaySinceLastOrder,na.rm = TRUE)
+medOrderCount <- median(hd$OrderCount,na.rm = TRUE)
+
+hd[is.na(hd$Tenure),'Tenure'] <- medTenure
+hd[is.na(hd$WarehouseToHome),'WarehouseToHome'] <- medWarehouseToHome
+hd[is.na(hd$HourSpendOnApp),'HourSpendOnApp'] <- medHourSpendOnApp
+hd[is.na(hd$CouponUsed),'CouponUsed'] <- medCouponUsed
+hd[is.na(hd$OrderAmountHikeFromlastYear),'OrderAmountHikeFromlastYear'] <- medOrderAmountHikeFromlastYear
+hd[is.na(hd$DaySinceLastOrder),'DaySinceLastOrder'] <- medDaySinceLastOrder
+hd[is.na(hd$OrderCount),'OrderCount'] <- medOrderCount
+print(colSums(is.na(hd)))
+```
+
+
+# Decisssion Tree
+
+### Spliting data into test and train data 
+
+```{r Spliting data into test and train data}
+library(rsample)  # testing/training splits 
+library(recipes)     # preprocessing
+library(yardstick)   #  ROC/AUC
+create_train_test <- function(data, size = 0.8, train = TRUE) {
+    n_row <- nrow(data)
+    total_row <- size * n_row
+    train_sample <- 1:total_row
+    if (train == TRUE) {
+        return (data[train_sample, ])
+      } else {
+        return (data[-train_sample, ])
+     }
+}
+data_train <- create_train_test(hd, 0.8, train = TRUE)
+data_test <- create_train_test(hd, 0.8, train = FALSE)
+print(dim(data_train))
+print(dim(data_test))
+```
+
+### Desicion tree  
+
+```{r Desicion Tree}
+library(rpart)
+library(rpart.plot)
+fit <- rpart(Churn~., data = data_train, method = 'class')
+rpart.plot(fit,extra= 106)
+
+#default.ct <- rpart(Personal.Loan ~ ., data = train.df, method = "class")
+# plot tree
+prp(fit, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10)
+
+
+```
+
+### Making a Prediction  
+
+```{r Making a Prediction}
+predict_unseen <-predict(fit, data_test, type = 'class')
+```
+
+### Testing the churn customers  
+
+```{r Testing the churn customers}
+table_mat_test <- table(data_test$Churn, predict_unseen)
+table_mat_test
+```
+
+### Confusion Matrix  
+
+```{r Confusion Matrix}
+accuracy_Test <- sum(diag(table_mat_test)) / sum(table_mat_test)
+print(paste('Accuracy for test for Decission tree', accuracy_Test))
+```
+### Results for Decision Tree
+Accuracy: 89%
+
+Precision: 78%
+
+Recall: 53%
+
+F1 Score: 63%
+
+
+### Complexity Parameter
+
+```{r pa_cp}
+cv.ct <- rpart(Churn ~ ., data = data_train, method = "class", 
+    cp = 0.00001, minsplit = 5, xval = 5)
+printcp(cv.ct)
+
+pruned.ct <- prune(cv.ct,
+cp = cv.ct$cptable[which.min(cv.ct$cptable[,"xerror"]),"CP"])
+length(pruned.ct$frame$var[pruned.ct$frame$var == "<leaf>"])
+prp(pruned.ct, type = 1, extra = 1, split.font = 1, varlen = -10)
+
+predict_unseen <-predict(pruned.ct, data_test, type = 'class')
+
+table_mat_test <- table(data_test$Churn, predict_unseen)
+table_mat_test
+
+accuracy_Test <- sum(diag(table_mat_test)) / sum(table_mat_test)
+print(paste('Test Accuracy for Pruned Decission tree', accuracy_Test))
+```
+### Results for Pruned Decision Tree
+Accuracy: 95%
+
+Precision: 90%
+
+Recall: 72%
+
+F1 Score: 80%
+
+
+# Random Forest  
+
+### Random Forest training model
+
+```{r Random Forest training model}
+library(randomForest)
+set.seed(200)
+data_train_random <- create_train_test(hd, 0.8, train = TRUE)
+data_test_random <- create_train_test(hd, 0.8, train = FALSE)
+hd_rf = randomForest(factor(Churn)~., data=data_train_random, ntree=500, proximity=T)
+table(predict(hd_rf), data_train_random$Churn)
+hd_rf
+plot(hd_rf)
+```
+### Finding Feature Importance
+
+```{r Finding Feature Importance}
+importance(hd_rf)
+
+```
+### Making a Prediction  
+
+```{r Making a Prediction rf}
+predict_unseen_rf <-predict(hd_rf, data_test_random, type = 'class')
+```
+
+### Testing the churn customers  
+
+```{r Testing the churn customers rf}
+table_mat_rf <- table(data_test_random$Churn, predict_unseen_rf)
+table_mat_rf
+```
+
+
+### Confusion Matrix  
+
+```{r Confusion Matrix rf}
+accuracy_Test_rf <- sum(diag(table_mat_rf)) / sum(table_mat_rf)
+print(paste('Accuracy for test for Decission tree', accuracy_Test_rf))
+
+```
+### Results for Random Tree
+Accuracy: 96%
+
+Precision: 100%
+
+Recall: 71%
+
+F1 Score: 83%
+
+# Conclusion
+
+Basis F1 score, Random Forest has better prediction power compared to Decision Tree and Pruned Decision Tree.
+
+
+
+
+
+
