@@ -2,10 +2,11 @@
 
 1
 Title: Ecommerce Customers Churn Analysis
+
 Group 1: Club Ecommerce
- Abhishek Kukreja
+
  Ravina Ingole
- Akash Dhage
+
 Contents:
 1. Executive Summary
 2. Problem Statement & Research Question
@@ -27,7 +28,7 @@ Contents:
 6.3. Heat Map
 6.4. Bar Plot
 6.5. Scatter Plot
-2
+
 1.Executive Summary:
 This project involves deploying the supervised machine learning algorithm. Supervised machine
 learning algorithm can be classification or regression. This project is based on building a classifier.
@@ -56,7 +57,7 @@ predict the churn of each customer.
 Dataset for the project was derived from Kaggle. Dataset originally had 5,630 records and 21
 features (20 independent variables + 1 target variable). As a pre-elementary step, dataset was
 probed to highlight any missing values and outlier values.
-3
+
 3.1. Missing values treatment:
 Dataset had 1,856 records with null values (33% of total data). Eliminating all these records will
 result into huge data loss and less data availability for creating a machine learning model.
@@ -88,7 +89,7 @@ Observations:
 Tiers (~15%).
 4. Most of the users spend ~3hrs on app/website.
 5. Debit card and credit card is the most often payment mode of delivery followed by UPI, wallet,
-4
+
 COD etc.
 6. Churn rate amongst users who have complained is 46% while Churn rate amongst users who
 have not complained is observed at 12%.
@@ -112,13 +113,14 @@ find the best split. Best split is decided basis the reduction in impurity befor
 (Gini impurity or entropy).
 For our project, tenure is the root node and the resulting child nodes are cashback amount and
 complain.
-5
+
 4.3 Pruned Decision Tree:
 Decision Tree has disadvantage of overfitting on the t
 raining data and models the noise in the training data. This is addressed by controlling the
 depth of the tree using complexity parameter. By plotting the complexity parameter, we can find
 that it has minimum accuracy at 20th row i.e. 0.5409 and the corresponding terminal nodes are
 110.
+
 4.4 Random Forest:
 Random forest is an ensemble machine learning approach which combines multiple machine
 learning models for prediction. It encompasses two approaches - bagging (improves predictive
@@ -127,12 +129,13 @@ random samples with replacement from the data). Apart from instilling randomness
 samples from dataset, randomness is brought into effect while selecting a subset of predictors at
 each stage. Label is identified by voting for classification and averaging for prediction.
 For our project, we have used 500 decision trees to build random forest.
+
 4.5 Results:
 Accuracy was used to access the three-model performance at a rudimentary level. However,
 accuracy doesn’t consider true positives, true negative, false positivity rate etc. Hence, metrics
 such as precision, recall and F1 score were also evaluated to better comprehend the
 performance. Result summary for the three models is shown below:
-6
+
 ML models Accuracy Precision Recall F1 Score
 Decision tree
 89%
@@ -141,6 +144,7 @@ Pruned decision tree
 95%
 90% 72% 80%
 Random Forest 96% 100% 71% 83%
+
 Table 4.1.1
 5.Conclusion:
  Model was built using Decision Tree and Random Forest and accuracy for the
